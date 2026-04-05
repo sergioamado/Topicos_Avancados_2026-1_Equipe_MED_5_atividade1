@@ -1,2 +1,75 @@
-# Topicos_Avancados_2026-1_Equipe_MED_5_atividade1
-Atividade Avaliativa 1: Curadoria de Datasets e Inferência Básica com LLMs
+# Atividade Avaliativa 1: Curadoria de Datasets e Inferência Básica com LLMs
+
+**Repositório Oficial - Equipe 5 (Domínio Médico)**
+**Disciplina:** Tópicos Avançados (2026.1)
+
+## 👥 Equipe 5 (Medicina)
+* Marcelo West (Matrícula: [Preencher])
+* Clelio (Matrícula: [Preencher])
+* Sergio Santana (Matrícula: [Preencher])
+* Hernandson Bispo (Matrícula: [Preencher])
+* Moaath (Matrícula: [Preencher])
+* Tasneem (Matrícula: [Preencher])
+
+🎥 **[LINK PARA O VÍDEO DEMONSTRATIVO DA EQUIPE AQUI]**
+
+---
+
+## 🎯 Visão Geral do Projeto
+Este repositório contém os scripts, datasets e resultados da nossa imersão inicial com Modelos de Linguagem de Grande Escala (LLMs) aplicados ao Domínio Médico. O foco da atividade foi a curadoria especializada, a inferência local e a avaliação crítica das respostas geradas por IA contra padrões-ouro estabelecidos por especialistas.
+
+Trabalhamos com dois subconjuntos de dados:
+* **Dataset M1 (Itaymanes K-QA):** Questões abertas baseadas em casos reais com respostas em texto livre (*free-form answer*).
+* **Dataset M2 (USMLE):** Questões de múltipla escolha focadas no exame de licenciamento médico dos EUA.
+
+---
+
+## ⚙️ Arquitetura Técnica e Configuração de Inferência
+
+Para garantir a máxima performance e privacidade na manipulação dos dados médicos, optamos por rodar os modelos 100% localmente. 
+
+* **Hardware Base:** Ambiente Ubuntu 24.04 rodando em uma NVIDIA RTX 3060 (12GB VRAM).
+* **Motor de Inferência:** Utilizamos a biblioteca `llama.cpp` (via `llama-cpp-python`) compilada nativamente com suporte a CUDA (`-DGGML_CUDA=on`). Isso nos permitiu carregar todas as camadas dos modelos na VRAM (`n_gpu_layers=-1`), acelerando drasticamente o processamento.
+* **Modelos Utilizados (Formato GGUF - Quantização Q4_K_M):**
+  1. `Meta-Llama-3-8B-Instruct`
+  2. `Mistral-7B-Instruct-v0.2`
+  3. `Phi-3-mini-4k-instruct`
+
+---
+
+## 📊 Métricas de Avaliação (Quantitativas e Qualitativas)
+
+Devido à natureza crítica do domínio médico, a avaliação não pode se basear apenas na exatidão das palavras, mas sim no rigor semântico e clínico. Implementamos um pipeline de múltiplas métricas:
+
+### 1. Dataset M1 (Questões Abertas)
+* **BERTScore:** Avaliação semântica quantitativa. Utilizamos o modelo `roberta-large` para comparar a intenção e o significado da resposta gerada contra o gabarito padrão-ouro, superando as limitações de métricas lexicais como BLEU.
+* **F1-Token:** Avaliação de precisão e recall baseada na exatidão exata das palavras.
+* **Desvio de Similaridade:** Cálculo da divergência entre as respostas dos três modelos para analisar diferentes "linhas de raciocínio" clínico.
+* **LLM-as-a-Judge (Avaliação Qualitativa):** Utilizamos o Llama-3 atuando como um "Juiz Cego". O modelo avaliou cada par de respostas (Padrão-Ouro vs. Gerada) e atribuiu uma nota de **1 a 5** para a precisão médica e integridade da informação gerada.
+
+### 2. Dataset M2 (Múltipla Escolha)
+* **Acurácia Estrita:** Utilização de expressões regulares (Regex) e injeção de *system prompts* restritivos para forçar a extração de uma única letra (A-E), permitindo o cálculo exato de acertos contra o gabarito oficial.
+* **Taxa de Concordância:** Métrica binária (Unânime/Divergente) para avaliar o consenso dos três modelos diante do mesmo caso clínico.
+
+---
+
+## 🗂️ Curadoria Humana (Classificação Criativa)
+
+Como curadores especialistas, a equipe definiu uma taxonomia clínica própria para classificar as questões processadas:
+
+1. **Nível de Dificuldade:**
+   * **Triagem:** Casos básicos de avaliação inicial.
+   * **Generalista:** Exige conhecimento clínico sólido, mas sem especialização profunda.
+   * **Especialista:** Requer conhecimento avançado e análise de interações/comorbidades.
+   * **Expert:** Casos complexos ou raros que desafiam juntas médicas.
+2. **Área de Especialidade:** Mapeamento da disciplina médica principal (ex: Neurologia, Cardiologia, Infectologia).
+3. **Referência:** Indicação da diretriz, protocolo ou literatura base (ex: Harrison's Principles, Protocolos Clínicos locais).
+
+---
+
+## 🚀 Como Reproduzir os Experimentos
+
+1. Clone este repositório.
+2. Instale as dependências (certifique-se de ter os compiladores C++ e o toolkit da NVIDIA instalados):
+
+   CMAKE_ARGS="-DGGML_CUDA=on" pip install -r requirements.txt
