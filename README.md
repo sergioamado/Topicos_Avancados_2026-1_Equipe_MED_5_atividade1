@@ -24,16 +24,28 @@ Trabalhamos com dois subconjuntos de dados:
 
 ---
 
+## 🛠️ Pré-requisitos e Ferramentas
+
+Para executar os scripts deste repositório, recomendamos a seguinte configuração de ambiente:
+
+1. **IDE (Ambiente de Desenvolvimento):**
+   * Recomendamos o uso do **Visual Studio Code (VS Code)**. 
+   * 🔗 [Download do VS Code aqui](https://code.visualstudio.com/)
+
+2. **Downloads dos Modelos (Hugging Face):**
+   * Os modelos devem ser baixados no formato GGUF e salvos dentro de uma pasta chamada `modelos/` na raiz do projeto.
+   * 🔗 **Llama-3 (8B):** [Meta-Llama-3-8B-Instruct.Q4_K_M.gguf](https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF)
+   * 🔗 **Mistral (7B):** [mistral-7b-instruct-v0.2.Q4_K_M.gguf](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF)
+   * 🔗 **Phi-3 (3.8B):** [Phi-3-mini-4k-instruct-q4.gguf](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf)
+
+---
+
 ## ⚙️ Arquitetura Técnica e Configuração de Inferência
 
 Para garantir a máxima performance e privacidade na manipulação dos dados médicos, optamos por rodar os modelos 100% localmente. 
 
 * **Hardware Base:** Ambiente Ubuntu 24.04 rodando em uma NVIDIA RTX 3060 (12GB VRAM).
 * **Motor de Inferência:** Utilizamos a biblioteca `llama.cpp` (via `llama-cpp-python`) compilada nativamente com suporte a CUDA (`-DGGML_CUDA=on`). Isso nos permitiu carregar todas as camadas dos modelos na VRAM (`n_gpu_layers=-1`), acelerando drasticamente o processamento.
-* **Modelos Utilizados (Formato GGUF - Quantização Q4_K_M):**
-  1. `Meta-Llama-3-8B-Instruct`
-  2. `Mistral-7B-Instruct-v0.2`
-  3. `Phi-3-mini-4k-instruct`
 
 ---
 
@@ -70,6 +82,11 @@ Como curadores especialistas, a equipe definiu uma taxonomia clínica própria p
 ## 🚀 Como Reproduzir os Experimentos
 
 1. Clone este repositório.
-2. Instale as dependências (certifique-se de ter os compiladores C++ e o toolkit da NVIDIA instalados):
+2. Instale as dependências listadas no `requirements.txt` (certifique-se de ter os compiladores C++ e o toolkit da NVIDIA instalados se desejar usar aceleração por GPU):
 
    CMAKE_ARGS="-DGGML_CUDA=on" pip install -r requirements.txt
+
+3. Execute os arquivos .py em ordem:
+   python 1_pipeline_m1.py
+   python 2_juiz_m1.py
+   python 3_pipeline_m2.py
