@@ -4,12 +4,8 @@
 **Disciplina:** Tópicos Avançados (2026.1)
 
 ## 👥 Equipe 5 (Medicina)
-* Marcelo West (Matrícula: [Preencher])
-* Clelio (Matrícula: [Preencher])
-* Sergio Santana (Matrícula: [Preencher])
-* Hernandson Bispo (Matrícula: [Preencher])
-* Moaath (Matrícula: [Preencher])
-* Tasneem (Matrícula: [Preencher])
+* Sergio Santana dos Santos
+
 
 🎥 **[LINK PARA O VÍDEO DEMONSTRATIVO DA EQUIPE AQUI]**
 
