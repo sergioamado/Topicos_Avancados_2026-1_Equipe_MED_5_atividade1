@@ -12,12 +12,17 @@
 ---
 
 ## 🎯 Visão Geral do Projeto
-Este repositório contém os scripts, datasets e resultados da nossa imersão inicial com Modelos de Linguagem de Grande Escala (LLMs) aplicados ao Domínio Médico. O foco da atividade foi a curadoria especializada, a inferência local e a avaliação crítica das respostas geradas por IA contra padrões-ouro estabelecidos por especialistas.
+Este repositório contém os scripts, datasets e resultados da nossa imersão inicial com Modelos de Linguagem de Grande Escala (LLMs) quantizados para rodar no ambiente local e aplicados ao Domínio Médico. O foco da atividade foi a curadoria especializada, a inferência local e a avaliação crítica das respostas geradas por IA contra padrões-ouro estabelecidos por especialistas.
 
 Trabalhamos com dois subconjuntos de dados:
 * **Dataset M1 (Itaymanes K-QA):** Questões abertas baseadas em casos reais com respostas em texto livre (*free-form answer*).
 * **Dataset M2 (USMLE):** Questões de múltipla escolha focadas no exame de licenciamento médico dos EUA.
-
+  
+Para:
+* Curadoria de dados
+* Inferência local com múltiplos modelos
+* Avaliação quantitativa e qualitativa
+* Classificação de complexidade clínica
 ---
 
 ## 🛠️ Pré-requisitos e Ferramentas
@@ -44,6 +49,20 @@ Para garantir a máxima performance e privacidade na manipulação dos dados mé
 * **Motor de Inferência:** Utilizamos a biblioteca `llama.cpp` (via `llama-cpp-python`) compilada nativamente com suporte a CUDA (`-DGGML_CUDA=on`). Isso nos permitiu carregar todas as camadas dos modelos na VRAM (`n_gpu_layers=-1`), acelerando drasticamente o processamento.
 
 ---
+📂 Datasets Utilizados
+🔹 Dataset M1 – Questões Abertas
+Fonte: K-QA (Itaymanes)
+Contém:
+Question
+Free_form_answer (padrão-ouro)
+Must_have
+Nice_to_have
+Sources
+ICD_10_diag
+🔹 Dataset M2 – Múltipla Escolha
+Fonte: USMLE
+Contém questões objetivas com gabarito oficial
+---
 
 ## 📊 Métricas de Avaliação (Quantitativas e Qualitativas)
 
@@ -61,17 +80,48 @@ Devido à natureza crítica do domínio médico, a avaliação não pode se base
 
 ---
 
-## 🗂️ Curadoria Humana (Classificação Criativa)
+🧠 Classificação de Dificuldade (Curadoria)
 
-Como curadores especialistas, a equipe definiu uma taxonomia clínica própria para classificar as questões processadas:
+As questões foram classificadas em:
 
-1. **Nível de Dificuldade:**
-   * **Triagem:** Casos básicos de avaliação inicial.
-   * **Generalista:** Exige conhecimento clínico sólido, mas sem especialização profunda.
-   * **Especialista:** Requer conhecimento avançado e análise de interações/comorbidades.
-   * **Expert:** Casos complexos ou raros que desafiam juntas médicas.
-2. **Área de Especialidade:** Mapeamento da disciplina médica principal (ex: Neurologia, Cardiologia, Infectologia).
-3. **Referência:** Indicação da diretriz, protocolo ou literatura base (ex: Harrison's Principles, Protocolos Clínicos locais).
+Triagem → Casos simples e diretos
+Generalista → Conhecimento clínico básico
+Especialista → Exige protocolos e análise clínica
+Expert → Casos complexos ou raros
+🤝 Ensemble de Modelos
+
+Cada questão é avaliada por três modelos:
+
+LLaMA
+Mistral
+Phi-3
+
+A classificação final é definida por voto majoritário.
+
+---
+
+📊 Resultados Gerados
+**Excel consolidado com:
+* Respostas dos modelos
+* Classificação por modelo
+* BERTScore
+* Voto final
+**Gráficos:
+* ranking_modelos.png
+* score_por_classe.png
+
+---
+
+📈 Saídas
+M1_RESULTADO_COMPLETO.xlsx
+ranking_modelos.png
+score_por_classe.png
+
+---
+
+🧾 Conclusão
+
+O uso de múltiplos modelos em ensemble, combinado com métricas semânticas, permitiu uma avaliação robusta da qualidade das respostas e da complexidade clínica das questões.
 
 ---
 
@@ -81,8 +131,15 @@ Como curadores especialistas, a equipe definiu uma taxonomia clínica própria p
 2. Instale as dependências listadas no `requirements.txt` (certifique-se de ter os compiladores C++ e o toolkit da NVIDIA instalados se desejar usar aceleração por GPU):
 
    CMAKE_ARGS="-DGGML_CUDA=on" pip install -r requirements.txt
-
-3. Execute os arquivos .py em ordem:
-   python 1_pipeline_m1.py
-   python 2_juiz_m1.py
-   python 3_pipeline_m2.py
+---
+3. 📊 Pipeline do Projeto
+🔹 1. 1_pipeline_m1.py
+Geração de respostas para questões abertas
+🔹 2. 2_juiz_m1.py
+Avaliação qualitativa (LLM-as-a-Judge)
+🔹 3. 3_pipeline_m2.py
+Resolução de questões objetivas (USMLE)
+🔹 4. 4_classificacao_m1.py
+Classificação de dificuldade usando ensemble de LLMs
+Geração de métricas e gráficos
+---
