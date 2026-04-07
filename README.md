@@ -16,6 +16,7 @@ Este repositório contém os scripts, datasets e resultados da nossa imersão in
 
 Trabalhamos com dois subconjuntos de dados:
 * **Dataset M1 (Itaymanes K-QA):** Questões abertas baseadas em casos reais com respostas em texto livre (*free-form answer*).
+  
 * **Dataset M2 (USMLE):** Questões de múltipla escolha focadas no exame de licenciamento médico dos EUA.
   
 Para:
