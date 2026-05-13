@@ -29,14 +29,11 @@ for i in range(len(matches)):
     
     bloco = texto_completo[inicio:fim]
     
-    # Extrai o número da questão para verificar se está na sua lista
-    # Exemplo: de "Question 77.1 (", extrai o 77
     match_numero = re.search(r'Question (\d+)\.1', bloco)
     
     if match_numero:
         numero_extraido = int(match_numero.group(1))
         
-        # Só processa se o número estiver na lista que você forneceu
         if numero_extraido in numeros_alvo:
             # Extrai o gabarito oficial (A, B, C, D ou E)
             match_gabarito = re.search(r'Correct Response:\s*([A-E])', bloco)

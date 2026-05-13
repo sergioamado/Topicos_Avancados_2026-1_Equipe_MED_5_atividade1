@@ -8,7 +8,7 @@ CAMINHO_MODELO_LOCAL = "./modelos/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
 NOME_MODELO_JUIZ = "Llama-3-8B-Local"
 
 print("1. Carregando o Juiz na GPU Local (Isso pode levar uns segundos)...")
-# Carrega o modelo usando 100% da sua RTX 3060
+# Carrega o modelo usando 100% da RTX 3060
 llm = Llama(model_path=CAMINHO_MODELO_LOCAL, n_gpu_layers=-1, n_ctx=4096, verbose=False)
 
 conn = psycopg2.connect(**DB_CONFIG)
@@ -55,7 +55,7 @@ SCORE: <just the number from 1 to 5>"""
         try:
             resposta = llm.create_chat_completion(
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": prompt_usuario}],
-                max_tokens=250, # Espaço suficiente para o juiz explicar
+                max_tokens=250, # Espaço para o juiz explicar
                 temperature=0.1
             )
             resposta_juiz = resposta["choices"][0]["message"]["content"]
@@ -75,7 +75,7 @@ SCORE: <just the number from 1 to 5>"""
                 VALUES (%s, %s, %s, %s);
             """, (id_resp, id_juiz, score, reasoning))
             
-            # Commit a cada 10 respostas para garantir que os dados sejam salvos aos poucos
+            # Commit a cada 10 respostas para garantir que os dados sejam salvos
             conn.commit() 
             print(f"Resposta ID {id_resp} avaliada! Nota: {score}")
 

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from groq import Groq
 
-# 1. Carregar variáveis do arquivo .env
+# Carregar variáveis do arquivo .env
 load_dotenv()
 
 DB_CONFIG = {
@@ -23,9 +23,9 @@ client = Groq(api_key=GROQ_API_KEY)
 
 print("1. Iniciando o Juiz em Nuvem (Com gerenciamento de Cota Diária)...")
 
-# --- LOOP MESTRE ---
+
 while True:
-    # A cada ciclo (ou ao acordar), reconectamos ao banco com segurança
+    # A cada ciclo reconecta ao banco
     conn = psycopg2.connect(**DB_CONFIG)
     conn.autocommit = False
     cursor = conn.cursor()
@@ -50,10 +50,10 @@ while True:
         """)
         respostas_pendentes = cursor.fetchall()
 
-        # Se a lista estiver vazia, todo o trabalho acabou!
+        # Se a lista estiver vazia acabou
         if len(respostas_pendentes) == 0:
             print("\n[SUCESSO ABSOLUTO] Todas as respostas do banco foram avaliadas!")
-            break # Sai do loop mestre e encerra o programa
+            break # encerra o programa
 
         print(f"\n-> Retomando o trabalho: {len(respostas_pendentes)} respostas na fila.\n")
 
@@ -121,13 +121,13 @@ SCORE: <just the number from 1 to 5>"""
                     conn.rollback()
                     continue # Se for outro erro de conexão, pula e tenta a próxima
 
-        # Quando sair do laço 'for', verifica se foi porque o limite estourou
+        
         if limite_diario_atingido:
-            # FECHA o banco para evitar timeout
+            # FECHA o banco evitar timeout
             cursor.close()
             conn.close()
             
-            # Calcula o tempo exato: 24h * 60m * 60s + 10m * 60s
+            
             segundos_espera = (24 * 60 * 60) + (10 * 60)
             hora_retorno = datetime.now() + timedelta(seconds=segundos_espera)
             
@@ -137,10 +137,9 @@ SCORE: <just the number from 1 to 5>"""
             print("Pode ir descansar! Não feche este terminal e certifique-se que o PC não vai suspender.\n")
             
             time.sleep(segundos_espera)
-            # Após o sleep, o Loop Mestre 'while True' recomeça do topo conectando no banco!
 
         else:
-            # Se terminou o 'for' e o limite não foi atingido, tudo acabou bem!
+
             break
 
     except Exception as e:
@@ -149,7 +148,7 @@ SCORE: <just the number from 1 to 5>"""
         break
 
     finally:
-        # Garante que a conexão do ciclo sempre será fechada
+        
         if not conn.closed:
             cursor.close()
             conn.close()

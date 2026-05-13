@@ -5,7 +5,7 @@ import time
 from dotenv import load_dotenv
 from groq import Groq
 
-# 1. Carregar variáveis do arquivo .env
+# Carregar variáveis do arquivo .env
 load_dotenv()
 
 DB_CONFIG = {
@@ -95,7 +95,6 @@ SCORE: <just the number from 1 to 5>"""
                 conn.commit()
                 print(f"[OK] Resposta {id_resp} julgada. Score: {score}")
                 
-                # Deu certo! Sai do loop "while" e vai para a próxima pergunta do "for"
                 break 
 
             except Exception as e_api:
@@ -103,12 +102,12 @@ SCORE: <just the number from 1 to 5>"""
                 
                 # Se for erro 429 (Limite de Tokens atingido)
                 if "429" in error_msg or "rate limit" in error_msg.lower():
-                    # Tenta ler o tempo que a Groq mandou esperar (ex: 7m39s)
+                    # Tenta ler o tempo que a Groq mandou esperar 
                     match = re.search(r'try again in (?:(\d+)m)?([\d\.]+)s', error_msg)
                     if match:
                         minutos = int(match.group(1)) if match.group(1) else 0
                         segundos = float(match.group(2))
-                        # Tempo exato + 10 segundinhos de garantia
+                        # Tempo exato + 10 segundos de garantia
                         espera_segundos = (minutos * 60) + segundos + 10 
                     else:
                         espera_segundos = 480 # Se não conseguir ler, aguarda 8 minutos por padrão
@@ -117,9 +116,7 @@ SCORE: <just the number from 1 to 5>"""
                     print(f"O script vai dormir por {espera_segundos / 60:.1f} minutos e continuar sozinho depois. Não feche o terminal!\n")
                     
                     time.sleep(espera_segundos)
-                    # Não colocamos break aqui, então o "while True" vai tentar a mesma pergunta de novo após acordar!
                 
-                # Se for qualquer outro erro bizarro de API, aborta essa pergunta e pula
                 else:
                     print(f"[ERRO API] Falha grave no ID {id_resp}: {e_api}")
                     conn.rollback()
