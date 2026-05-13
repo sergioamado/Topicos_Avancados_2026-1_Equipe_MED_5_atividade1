@@ -2,62 +2,133 @@ import pandas as pd
 from llama_cpp import Llama
 import re
 import gc
+import os
+import time
 
-print("Lendo Dataset M2 local...")
+# --- CONFIGURAÇÕES DE PODER MÁXIMO ---
+N_CTX = 4096         # Aumentado para suportar casos médicos longos + raciocínio
+N_BATCH = 1024       # Aumentado para processar o prompt mais rápido na 3060
+GPU_LAYERS = -1      # Tudo na GPU
+
+def extrair_letra(texto):
+    # Procura por "Resposta: A" ou "Resultado: A" ou apenas a letra isolada no final
+    match = re.search(r'(?:RESPOSTA|ANSWER|RESULTADO|FINAL):\s*([A-E])', texto, re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+    # Se não achar o padrão, tenta achar qualquer letra A-E isolada
+    match = re.search(r'\b[A-E]\b', texto)
+    return match.group(0).upper() if match else "N/A"
+
+print("Lendo Dataset M2...")
 df_m2 = pd.read_excel('dataset_m2.xlsx') 
-
 suas_questoes = df_m2.copy() 
 
+# Lista de modelos (Sugestão: use versões Q5_K_M ou Q6_K para máxima qualidade na 3060)
 modelos_gguf = [
     ("Llama-3", "./modelos/llama3.gguf"), 
     ("Mistral", "./modelos/mistral.gguf"), 
     ("Phi-3", "./modelos/phi3.gguf")
 ]
 
-print("\nIniciando extração de alternativas...")
 for nome_modelo, caminho in modelos_gguf:
-    print(f"Processando {nome_modelo}...")
-    llm = Llama(model_path=caminho, n_gpu_layers=-1, n_ctx=2048, verbose=False)
-    respostas = []
+    if not os.path.exists(caminho):
+        print(f"Arquivo não encontrado: {caminho}")
+        continue
+
+    print(f"\n" + "="*50)
+    print(f"CARREGANDO MODELO: {nome_modelo}")
+    print("="*50)
+    
+    llm = Llama(
+        model_path=caminho,
+        n_gpu_layers=GPU_LAYERS,
+        n_ctx=N_CTX,
+        n_batch=N_BATCH,
+        f16_kv=True,
+        flash_attn=True, # Crucial para performance na série 3000
+        verbose=False
+    )
+    
+    respostas_finais = []
+    raciocinios = []
+    
+    start_time = time.time()
     
     for idx, row in suas_questoes.iterrows():
         try:
+            # PROMPT AVANÇADO (Chain of Thought)
+            # Pedimos para o modelo pensar brevemente, isso aumenta a acurácia médica.
+            prompt_sistema = (
+                "You are a highly skilled medical specialist. "
+                "Analyze the following clinical case, provide a very brief rationale, "
+                "and then conclude with the correct option letter."
+            )
+            
+            prompt_usuario = (
+                f"Question: {row['Question']}\n\n"
+                "Format your response as:\n"
+                "Rationale: [Your brief reasoning]\n"
+                "Answer: [Letter]"
+            )
+
             resposta = llm.create_chat_completion(
                 messages=[
-                    {"role": "system", "content": "You are taking a multiple-choice medical test. Reply ONLY with the single letter of the correct option (A, B, C, D, or E). Do not explain."},
-                    {"role": "user", "content": str(row['Question'])}
-                ], max_tokens=5, temperature=0.1
+                    {"role": "system", "content": prompt_sistema},
+                    {"role": "user", "content": prompt_usuario}
+                ],
+                max_tokens=150, # Espaço para o raciocínio
+                temperature=0.1  # Baixa temperatura para manter consistência
             )
-            letra = re.search(r'\b[A-E]\b', resposta["choices"][0]["message"]["content"])
-            respostas.append(letra.group() if letra else "N/A")
-        except: 
-            respostas.append("Erro")
-        
-    suas_questoes[f'Resposta_{nome_modelo}'] = respostas
+            
+            conteudo = resposta["choices"][0]["message"]["content"]
+            letra = extrair_letra(conteudo)
+            
+            respostas_finais.append(letra)
+            raciocinios.append(conteudo) # Guardamos o raciocínio para análise posterior
+            
+            if idx % 5 == 0:
+                print(f"[{nome_modelo}] Processado {idx}/{len(suas_questoes)}... Última: {letra}")
+                
+        except Exception as e:
+            print(f"Erro no índice {idx}: {e}")
+            respostas_finais.append("Erro")
+            raciocinios.append("Erro")
+    
+    suas_questoes[f'Resposta_{nome_modelo}'] = respostas_finais
+    suas_questoes[f'Raciocinio_{nome_modelo}'] = raciocinios
+    
+    # Limpeza total da VRAM para o próximo modelo
     del llm
     gc.collect()
+    time.sleep(2) # Pausa para o driver da GPU respirar
 
-print("\nCalculando Acurácia e Concordância...")
-gabaritos = suas_questoes['Answer'].astype(str).str.strip().str.upper().tolist()
+# --- MÉTRICAS E FINALIZAÇÃO ---
+print("\n" + "X"*50)
+print("PROCESSAMENTO CONCLUÍDO. GERANDO RESULTADOS...")
 
-for nome, _ in modelos_gguf:
-    resp = suas_questoes[f'Resposta_{nome}'].astype(str).str.strip().str.upper().tolist()
-    acertos = sum(1 for r, g in zip(resp, gabaritos) if r == g)
-    print(f"Acurácia {nome}: {(acertos / len(gabaritos)) * 100:.2f}%")
+if 'Answer' in suas_questoes.columns:
+    gabarito = suas_questoes['Answer'].astype(str).str.strip().str.upper()
+    for nome, _ in modelos_gguf:
+        if f'Resposta_{nome}' in suas_questoes.columns:
+            preds = suas_questoes[f'Resposta_{nome}'].astype(str).str.strip().str.upper()
+            acertos = (preds == gabarito).sum()
+            total = len(gabarito)
+            print(f"Acurácia Final {nome}: {acertos}/{total} ({(acertos/total)*100:.2f}%)")
 
-# Métrica de Concordância Múltipla Escolha
-concordancia = []
-for idx, row in suas_questoes.iterrows():
-    r_l3 = str(row.get('Resposta_Llama-3')).strip()
-    r_m = str(row.get('Resposta_Mistral')).strip()
-    r_p3 = str(row.get('Resposta_Phi-3')).strip()
-    
-    if r_l3 == r_m == r_p3: 
-        concordancia.append("Unânime")
-    else: 
-        concordancia.append("Divergente")
-        
-suas_questoes['Concordância_Modelos'] = concordancia
+# Concordância entre os 3 principais
+def verificar_concordancia(row):
+    try:
+        r1 = str(row.get(f'Resposta_{modelos_gguf[0][0]}'))
+        r2 = str(row.get(f'Resposta_{modelos_gguf[1][0]}'))
+        r3 = str(row.get(f'Resposta_{modelos_gguf[2][0]}'))
+        if r1 == r2 == r3: return "Unânime"
+        if r1 == r2 or r1 == r3 or r2 == r3: return "Maioria"
+        return "Divergente"
+    except:
+        return "Erro"
 
-suas_questoes.to_excel('M2_FINAL_Sergio.xlsx', index=False)
-print("\nConcluído! Salvo em 'M2_FINAL_Sergio.xlsx'.")
+suas_questoes['Consenso'] = suas_questoes.apply(verificar_concordancia, axis=1)
+
+# Salva com os raciocínios para você poder conferir por que o modelo escolheu a letra
+suas_questoes.to_excel('M2_RESULTADO_MAXIMO.xlsx', index=False)
+print("\nArquivo salvo: M2_RESULTADO_MAXIMO.xlsx")
