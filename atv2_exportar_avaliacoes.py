@@ -3,7 +3,7 @@ import psycopg2
 import pandas as pd
 from dotenv import load_dotenv
 
-# 1. Carregar variáveis do arquivo .env
+# Carregar variáveis do arquivo .env
 load_dotenv()
 
 DB_CONFIG = {
@@ -42,13 +42,12 @@ try:
     """
     
     print("2. Extraindo as avaliações do Juiz-IA...")
-    # O Pandas lê a query e já transforma em um DataFrame (tabela)
     df_avaliacoes = pd.read_sql_query(query, conn)
     
     if df_avaliacoes.empty:
         print("[AVISO] Nenhuma avaliação encontrada no banco. O Juiz já avaliou alguma coisa?")
     else:
-        # 3. Salvar em CSV
+        # Salvar em CSV
         nome_arquivo = "avaliacoes_consolidadas_equipe5.csv"
         df_avaliacoes.to_csv(nome_arquivo, index=False, encoding='utf-8')
         

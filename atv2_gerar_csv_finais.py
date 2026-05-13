@@ -10,17 +10,17 @@ try:
     for modelo in modelos:
         df_mcq = pd.DataFrame()
         
-        # 1. question
+        # question
         df_mcq['question'] = df_m2.get('Question', df_m2.get('Pergunta'))
         
-        # 2. prediction (com o nome do modelo, ex: llama-3_prediction)
+        # prediction (com o nome do modelo, ex: llama-3_prediction)
         col_pred = f"{modelo.lower()}_prediction"
         df_mcq[col_pred] = df_m2[f'Resposta_{modelo}']
         
-        # 3. correct (gabarito ouro)
+        # correct (gabarito ouro)
         df_mcq['correct'] = df_m2.get('Answer', df_m2.get('Gabarito'))
         
-        # 4. score (Calcula automaticamente: 1 se a IA acertou, 0 se a IA errou)
+        # score (Calcula automaticamente: 1 se a IA acertou, 0 se a IA errou)
         # Limpamos espaços e deixamos maiúsculo para garantir a comparação
         pred_limpa = df_mcq[col_pred].astype(str).str.strip().str.upper()
         corr_limpa = df_mcq['correct'].astype(str).str.strip().str.upper()
@@ -41,20 +41,20 @@ try:
     for modelo in modelos:
         df_open = pd.DataFrame()
         
-        # 1. id
+        # id
         # Se você já tiver uma coluna de ID, ele pega. Se não, cria números de 1 até o fim.
         if 'ID_Questao' in df_m1.columns:
             df_open['id'] = df_m1['ID_Questao']
         else:
             df_open['id'] = range(1, len(df_m1) + 1)
             
-        # 2. question
+        # question
         df_open['question'] = df_m1.get('Pergunta', df_m1.get('Question'))
         
-        # 3. answer (A resposta que a IA gerou)
+        # answer (A resposta que a IA gerou)
         df_open['answer'] = df_m1[f'Resposta_{modelo}']
         
-        # 4. must_have_score
+        # must_have_score
         # Tenta procurar alguma nota que você já tenha (Juiz, BERTScore, ou TokenF1).
         # Se você tiver uma coluna com outro nome, basta alterar aqui embaixo:
         if f'Nota_Juiz_{modelo}' in df_m1.columns:

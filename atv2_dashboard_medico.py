@@ -8,7 +8,7 @@ st.set_page_config(page_title="Auditoria Clínica IA - Equipa 5", layout="wide",
 st.title("🩺 Auditoria Clínica de IA: LLM-as-a-Judge")
 st.markdown("Análise de segurança, acurácia e risco ao paciente sob a avaliação do Llama-3.3-70B (Diretrizes AHA/SBC).")
 
-# --- 1. CARREGAMENTO E PREPARAÇÃO DOS DADOS ---
+# CARREGAMENTO E PREPARAÇÃO DOS DADOS 
 @st.cache_data
 def load_data():
     df = pd.read_csv("avaliacoes_consolidadas_equipe5.csv")
@@ -39,7 +39,7 @@ except FileNotFoundError:
     st.error("Ficheiro CSV não encontrado. Execute a exportação primeiro.")
     st.stop()
 
-# --- FILTROS LATERAIS ---
+# FILTROS LATERAIS 
 st.sidebar.header("🔍 Filtros Clínicos")
 dataset_selecionado = st.sidebar.selectbox("Dataset:", df['dataset'].unique())
 df_filtrado = df[df['dataset'] == dataset_selecionado]
@@ -48,7 +48,7 @@ modelos_disponiveis = df_filtrado['modelo_avaliado'].unique()
 modelos_selecionados = st.sidebar.multiselect("Comparar Modelos:", modelos_disponiveis, default=modelos_disponiveis)
 df_filtrado = df_filtrado[df_filtrado['modelo_avaliado'].isin(modelos_selecionados)]
 
-# Novo Filtro Textual
+# Filtro Textual
 termo_busca = st.sidebar.text_input("Filtrar por Doença/Termo (ex: hep, heart, blood):")
 if termo_busca:
     df_filtrado = df_filtrado[df_filtrado['pergunta'].str.contains(termo_busca, case=False, na=False)]
@@ -59,14 +59,14 @@ csv_export = df_filtrado.to_csv(index=False).encode('utf-8')
 st.sidebar.download_button(label="Descarregar CSV Atual", data=csv_export, file_name="auditoria_filtrada.csv", mime="text/csv")
 
 
-# --- CÁLCULO DE GAP TECNOLÓGICO (% DIFERENÇA) ---
+# CÁLCULO DE GAP TECNOLÓGICO % DIFERENÇA
 st.markdown("### 🏆 Painel de Desempenho e Indicadores")
 col1, col2, col3, col4 = st.columns(4)
 
 total_avaliacoes = len(df_filtrado)
 media_geral = df_filtrado['nota_do_juiz'].mean()
 
-# Agrupa as médias por categoria
+# Médias por categoria
 medias_cat = df_filtrado.groupby('categoria_modelo')['nota_do_juiz'].mean()
 media_locais = medias_cat.get('Locais (Até 8B)', 0)
 media_gigantes = medias_cat.get('Gigantes (Nuvem)', 0)
@@ -81,7 +81,7 @@ col1.metric("Avaliações Filtradas", total_avaliacoes)
 col2.metric("Média Global (1-5)", f"{media_geral:.2f}")
 col3.metric("Média Gigantes (Nuvem)", f"{media_gigantes:.2f}")
 
-# Exibe a métrica comparativa com o sinal de percentagem
+# Métrica comparativa
 if diff_pct > 0:
     col4.metric("Vantagem da Nuvem", f"{media_gigantes:.2f}", f"+{diff_pct:.1f}% vs Locais", delta_color="normal")
 elif diff_pct < 0:
@@ -91,7 +91,7 @@ else:
 
 st.divider()
 
-# --- CRIAÇÃO DAS ABAS ---
+# CRIAÇÃO DAS ABAS
 aba1, aba2, aba3, aba4 = st.tabs([
     "📊 Desempenho (Bons x Ruins)", 
     "⚖️ Gigantes vs Locais", 
@@ -99,9 +99,8 @@ aba1, aba2, aba3, aba4 = st.tabs([
     "🧩 Matriz de Proximidade"
 ])
 
-# ==========================================
-# ABA 1: BONS VS RUINS
-# ==========================================
+
+# ABA 1: PROPORÇÃO DE QUALIDADE CLÍNICA
 with aba1:
     st.markdown("#### Proporção de Qualidade Clínica")
     df_count = df_filtrado.groupby(['modelo_avaliado', 'qualidade']).size().reset_index(name='contagem')
@@ -112,9 +111,8 @@ with aba1:
     )
     st.plotly_chart(fig_stack, use_container_width=True)
 
-# ==========================================
-# ABA 2: A LUPA DO JUIZ 70B (COMPARAÇÃO DETALHADA)
-# ==========================================
+
+# ABA 2: JUIZ 70B (COMPARAÇÃO DETALHADA)
 with aba2:
     st.markdown("#### Distribuição Exata das Notas: Gigantes vs Locais")
     st.markdown("Os modelos comerciais de facto justificam o seu custo com um desempenho clinicamente superior?")
@@ -139,9 +137,7 @@ with aba2:
         )
         st.plotly_chart(fig_box, use_container_width=True)
 
-# ==========================================
 # ABA 3: RISCO CLÍNICO E URGÊNCIAS (NOTA 1)
-# ==========================================
 with aba3:
     st.markdown("#### 🚨 Eventos Adversos e Omissão de Urgência")
     df_criticos = df_filtrado[df_filtrado['nota_do_juiz'] == 1].copy()
@@ -169,9 +165,7 @@ with aba3:
                 st.markdown(f"**Auditoria do Juiz (70B):**")
                 st.write(row['justificativa_do_juiz'])
 
-# ==========================================
 # ABA 4: MATRIZ DE CORRELAÇÃO (SPEARMAN)
-# ==========================================
 with aba4:
     st.markdown("#### 🧩 Matriz de Concordância (Correlação de Spearman)")
     df_pivot = df_filtrado.pivot_table(index='id_pergunta', columns='modelo_avaliado', values='nota_do_juiz')
