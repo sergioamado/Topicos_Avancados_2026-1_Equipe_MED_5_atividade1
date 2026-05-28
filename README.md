@@ -144,3 +144,65 @@ Resolução de questões objetivas (USMLE)
 Classificação de dificuldade usando ensemble de LLMs
 Geração de métricas e gráficos
 ---
+
+# 🩺 Atividade 2: LLM-as-a-Judge e Auditoria Clínica (Equipa 5)
+
+Nesta segunda fase do projeto, implementámos um pipeline completo de MLOps para avaliar automaticamente as respostas médicas geradas pelos nossos modelos locais (Llama-3, Mistral e Phi-3) utilizando um modelo de grande escala na nuvem (Llama-3.3-70B via Groq API) atuando como Juiz Clínico. 
+
+Além das notas quantitativas, extraímos insights qualitativos e desenvolvemos uma plataforma interativa de auditoria de segurança do paciente.
+
+---
+
+## 🚀 Passo a Passo da Realização da Atividade 2
+
+O desenvolvimento desta atividade seguiu uma esteira de dados rigorosa:
+
+1. **Infraestrutura de Dados:** Criação da estrutura relacional no PostgreSQL e importação das perguntas, gabaritos e das respostas brutas geradas pelos nossos modelos locais.
+2. **Adequação de Formatos:** Transformámos os nossos dados originais nos formatos padronizados exigidos (CSV para MCQ e Open) para garantir compatibilidade com as métricas de exatidão.
+3. **Avaliação Automatizada (O Juiz IA):** Conectámos o nosso banco de dados PostgreSQL à API da Groq para que o Llama-3.3-70B lesse cada resposta médica aberta, atribuísse uma nota de 1 a 5 e justificasse o raciocínio com base em diretrizes clínicas.
+4. **Controle de Limites (Rate Limits):** Implementámos um sistema inteligente de *backoff* e hibernação que pausa os scripts automaticamente para não estourar os limites de tokens diários e por minuto da API gratuita.
+5. **Extração de Dados e Meta-Avaliação:** Exportámos as avaliações do banco para CSV e rodámos uma segunda camada de IA para classificar os tipos de erro (ex: Omissão de Dosagem, Diagnóstico Errado) e gerar insights para o AI Studio.
+6. **Dashboard Analítico:** Consolidámos todos os dados numa aplicação Streamlit interativa, permitindo auditar o desempenho, comparar o *gap* tecnológico entre modelos locais e gigantes da nuvem, e medir o risco clínico real (risco de óbito).
+
+---
+
+## 🛠️ Scripts Desenvolvidos e Como Executá-los
+
+Abaixo estão os scripts criados para esta atividade. Eles devem ser executados com o ambiente virtual Python ativado (`source venv_medico/bin/activate`).
+
+### 1. `setup_banco.py`
+* **O que faz:** Cria a infraestrutura do banco de dados PostgreSQL, estabelecendo as tabelas relacionais (perguntas, modelos, respostas e avaliações_juiz) garantindo a integridade dos dados.
+* **Como executar:** 
+  python3 setup_banco.py
+
+### 2. `inserir_respostas.py`
+* **O que faz:** Lê os resultados brutos gerados pelos nossos modelos locais (Llama-3, Mistral, Phi-3) e popula o banco de dados, interligando cada resposta à sua respectiva pergunta e gabarito ouro.
+* **Como executar:** 
+python3 inserir_respostas.py
+
+### 3. `gerar_csv_finais.py`
+* **O que faz:** Lê as planilhas Excel originais da Atividade 1 e gera automaticamente os arquivos padronizados `MCQ_Llama.csv`,`MCQ_Mistral.csv`,`MCQ_Phi-3.csv` (com cálculo de acurácia) e ``Open_Llama.csv`,`Open_Mistral.csv`,`Open_Phi-3.csv`.
+* **Como executar:**
+  python3 gerar_csv_finais.py
+
+ ### 4.  `juiz_nuvem.py`
+* **O que faz:** Conecta-se ao PostgreSQL, envia as perguntas e respostas abertas para o Llama-3.3-70B avaliar rigorosamente, e salva as notas (1-5) e justificativas de volta no banco, com tolerância a falhas e pausas automáticas de limite de API. 
+* **Como executar:**
+python3 juiz_nuvem.py
+
+### 5. `exportar_avaliacoes.py`
+* **O que faz:** Faz o cruzamento (JOIN) de todas as tabelas no PostgreSQL e exporta as avaliações completas do Juiz-IA para um arquivo avaliacoes_consolidadas_equipe5.csv.
+* **Como executar:**
+python3 exportar_avaliacoes.py
+
+### 6. `gerar_insights_csv_sergio.py`
+* **O que faz:** Processa o CSV consolidado e utiliza a IA para classificar os erros médicos dos modelos locais em categorias curtas e gerar insights clínicos num novo CSV (insights_sergio_para_aistudio.csv), retomando de onde parou em caso de interrupção.
+* **Como executar:**
+python3 gerar_insights_csv_sergio.py
+
+### 7. `app_auditoria_final.py`
+* **O que faz:** Levanta uma aplicação web robusta (Dashboard Streamlit) contendo a visão global da equipa, o benchmarking paramétrico contra os modelos de nuvem e a auditoria de risco de vida baseada nos insights extraídos.
+* **Como executar:**
+streamlit run app_auditoria_final.py
+
+Projeto desenvolvido para a disciplina de Tópicos Avançados - Equipa MED 5.

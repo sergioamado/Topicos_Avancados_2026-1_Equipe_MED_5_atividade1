@@ -100,7 +100,7 @@ aba1, aba2, aba3, aba4 = st.tabs([
 ])
 
 
-# ABA 1: PROPORÇÃO DE QUALIDADE CLÍNICA
+# PROPORÇÃO DE QUALIDADE CLÍNICA
 with aba1:
     st.markdown("#### Proporção de Qualidade Clínica")
     df_count = df_filtrado.groupby(['modelo_avaliado', 'qualidade']).size().reset_index(name='contagem')
@@ -112,7 +112,7 @@ with aba1:
     st.plotly_chart(fig_stack, use_container_width=True)
 
 
-# ABA 2: JUIZ 70B (COMPARAÇÃO DETALHADA)
+# JUIZ 70B (COMPARAÇÃO DETALHADA)
 with aba2:
     st.markdown("#### Distribuição Exata das Notas: Gigantes vs Locais")
     st.markdown("Os modelos comerciais de facto justificam o seu custo com um desempenho clinicamente superior?")
@@ -137,7 +137,7 @@ with aba2:
         )
         st.plotly_chart(fig_box, use_container_width=True)
 
-# ABA 3: RISCO CLÍNICO E URGÊNCIAS (NOTA 1)
+# RISCO CLÍNICO E URGÊNCIAS (NOTA 1)
 with aba3:
     st.markdown("#### 🚨 Eventos Adversos e Omissão de Urgência")
     df_criticos = df_filtrado[df_filtrado['nota_do_juiz'] == 1].copy()
@@ -165,7 +165,7 @@ with aba3:
                 st.markdown(f"**Auditoria do Juiz (70B):**")
                 st.write(row['justificativa_do_juiz'])
 
-# ABA 4: MATRIZ DE CORRELAÇÃO (SPEARMAN)
+# MATRIZ DE CORRELAÇÃO (SPEARMAN)
 with aba4:
     st.markdown("#### 🧩 Matriz de Concordância (Correlação de Spearman)")
     df_pivot = df_filtrado.pivot_table(index='id_pergunta', columns='modelo_avaliado', values='nota_do_juiz')

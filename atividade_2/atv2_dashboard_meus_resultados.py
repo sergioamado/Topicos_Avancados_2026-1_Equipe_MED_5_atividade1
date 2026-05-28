@@ -11,7 +11,7 @@ st.markdown("Análise focada no desempenho do **Llama-3, Mistral e Phi-3** nas Q
 # Modelos do Sergio
 meus_modelos = ['Llama-3', 'Mistral', 'Phi-3']
 
-# --- 1. CARREGAR DADOS M1 (Questões Abertas / Juiz) ---
+#  CARREGAR DADOS M1 (Questões Abertas / Juiz) 
 @st.cache_data
 def carregar_m1():
     try:
@@ -24,7 +24,7 @@ def carregar_m1():
     except Exception as e:
         return pd.DataFrame()
 
-# --- 2. CARREGAR DADOS M2 (Múltipla Escolha / Exatidão) ---
+#  CARREGAR DADOS M2 (Múltipla Escolha / Exatidão) 
 @st.cache_data
 def carregar_m2():
     dfs = []
@@ -44,9 +44,7 @@ df_m2 = carregar_m2()
 
 aba1, aba2 = st.tabs(["📝 M1: Questões Abertas (Avaliação do Juiz)", "🎯 M2: Múltipla Escolha (Taxa de Acerto)"])
 
-# ==========================================
-# ABA 1: QUESTÕES ABERTAS (M1)
-# ==========================================
+# QUESTÕES ABERTAS (M1)
 with aba1:
     st.header("Desempenho Raciocínio Clínico (M1)")
     if df_m1.empty:
@@ -80,9 +78,7 @@ with aba1:
             )
             st.plotly_chart(fig_stack, use_container_width=True)
 
-# ==========================================
-# ABA 2: MÚLTIPLA ESCOLHA (M2)
-# ==========================================
+# MÚLTIPLA ESCOLHA (M2)
 with aba2:
     st.header("Exatidão em Exames Médicos (M2)")
     st.markdown("*A métrica aqui é exata: 1 para acerto e 0 para erro (Acurácia).*")

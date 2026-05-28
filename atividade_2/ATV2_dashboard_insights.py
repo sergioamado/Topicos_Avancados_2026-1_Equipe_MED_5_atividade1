@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# 1. CONFIGURAÇÃO DA PÁGINA
+# CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Plataforma de Auditoria Médica - Equipa 5", layout="wide")
 
 # Estilo para as legendas e textos
@@ -15,13 +15,13 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CARREGAMENTO E LÓGICA DE RISCO
+#CARREGAMENTO E LÓGICA DE RISCO
 @st.cache_data
 def load_data():
     df = pd.read_csv("insights_sergio_para_aistudio.csv")
     df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce')
     
-    # --- Lógica de Parametrização de Risco Clínico ---
+    
     # Identifica potenciais Óbitos (Nota 1 + termos críticos)
     termos_obito = ['óbito', 'morte', 'fatal', 'letal', 'parada', 'grave', 'urgência']
     df['Risco_Obito'] = df.apply(lambda x: 1 if x['Nota'] == 1 and any(t in str(x['Insight_Clinico']).lower() for t in termos_obito) else 0, axis=1)
@@ -38,13 +38,13 @@ def load_data():
 
 df = load_data()
 
-# --- BARRA LATERAL ---
+# BARRA LATERAL 
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/387/387561.png", width=100)
 st.sidebar.title("Auditoria Equipa 5")
 modelos_selecionados = st.sidebar.multiselect("Selecione os Modelos:", df['Modelo'].unique(), default=df['Modelo'].unique())
 df_filtrado = df[df['Modelo'].isin(modelos_selecionados)]
 
-# --- EXPLICAÇÃO GERAL ---
+# EXPLICAÇÃO
 with st.container():
     st.title("🩺 Sistema de Auditoria de Segurança Clínica via LLM")
     st.markdown("""
@@ -56,7 +56,7 @@ with st.container():
     </div>
     """, unsafe_allow_html=True)
 
-# 3. MÉTRICAS PRINCIPAIS (Kpis)
+# MÉTRICAS PRINCIPAIS
 col1, col2, col3, col4 = st.columns(4)
 melhor_modelo_nome = df_filtrado.groupby('Modelo')['Nota'].mean().idxmax()
 col1.metric("🏆 Melhor Modelo Geral", melhor_modelo_nome)
@@ -66,19 +66,17 @@ col4.metric("🔍 Casos Não Diagnosticados", int(df_filtrado['Nao_Diagnosticado
 
 st.divider()
 
-# 4. ORGANIZAÇÃO EM ABAS
+# ORGANIZAÇÃO EM ABAS
 tab1, tab2, tab3 = st.tabs(["📊 Comparativo de Modelos", "🚨 Segurança do Paciente", "🧩 Categorias e Insights"])
 
-# ==========================================
-# TAB 1: COMPARATIVO GERAL E PARAMETRIZAÇÃO
-# ==========================================
+# COMPARATIVO GERAL E PARAMETRIZAÇÃO
 with tab1:
     st.header("Análise de Performance e Parametrização")
     c1, c2 = st.columns(2)
     
     with c1:
         st.subheader("Desempenho: Modelo vs Juiz")
-        # Gráfico para comparar as notas médias (Parametrização)
+        # Gráfico para comparar as notas médias
         df_rank = df_filtrado.groupby('Modelo')['Nota'].mean().sort_values(ascending=False).reset_index()
         fig_rank = px.bar(df_rank, x='Modelo', y='Nota', text_auto='.2f', color='Nota',
                           color_continuous_scale='RdYlGn', labels={'Nota':'Nota Média do Juiz'},
@@ -94,9 +92,7 @@ with tab1:
         st.plotly_chart(fig_vol, use_container_width=True)
         st.caption("Legenda: Comparação da frequência de cada nota. Modelos com mais barras à direita (4-5) são mais confiáveis.")
 
-# ==========================================
-# TAB 2: SEGURANÇA DO PACIENTE (RISCO)
-# ==========================================
+# SEGURANÇA DO PACIENTE (RISCO)
 with tab2:
     st.header("Análise de Risco de Vida e Erro Clínico")
     st.error("Atenção: Os dados abaixo representam falhas críticas que resultariam em danos diretos ao paciente.")
@@ -128,9 +124,7 @@ with tab2:
         st.plotly_chart(fig_omiss, use_container_width=True)
         st.caption("Legenda: Casos em que a IA foi incapaz de identificar a patologia presente no Gabarito Ouro.")
 
-# ==========================================
-# TAB 3: CATEGORIAS E MELHORES POR ÁREA
-# ==========================================
+# CATEGORIAS E MELHORES POR ÁREA
 with tab3:
     st.header("Análise por Categoria de Insight")
     
@@ -150,7 +144,7 @@ with tab3:
     st.plotly_chart(fig_ins, use_container_width=True)
     st.caption("Legenda: O tamanho do bloco representa o volume de ocorrências. A cor representa a qualidade (Verde = Bom, Vermelho = Crítico).")
 
-# 5. EXPLICAÇÃO FINAL DETALHADA
+# EXPLICAÇÃO FINAL DETALHADA
 st.divider()
 st.subheader("📖 Guia de Leitura da Auditoria")
 st.write("""
