@@ -20,6 +20,8 @@ Este projeto possui documentação complementar para facilitar a compreensão do
 | Documento                                     | Descrição                                                                                  |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | [Dicionário de Dados](./dicionario_dados.pdf) | Estrutura das tabelas, atributos, relacionamentos e campos utilizados ao longo do projeto. |
+|-----------------------------------------------|--------------------------------------------------------------------------------------------|
+| [Resumo das Ativiades](./Resumo.md)           |                                                                                            |
 
 ---
 
