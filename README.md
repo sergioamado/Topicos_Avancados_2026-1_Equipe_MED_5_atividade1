@@ -1,208 +1,393 @@
-# Atividade Avaliativa 1: Curadoria de Datasets e Inferência Básica com LLMs
+# 🩺 Projeto de Inteligência Artificial Aplicada ao Domínio Médico
 
-**Repositório Oficial - Equipe 5 (Domínio Médico)**
-**Disciplina:** Tópicos Avançados (2026.1)
+## Disciplina: Tópicos Avançados (2026.1)
 
-## 👥 Equipe 5 (Medicina)
+### Equipe 5 (MED 5)
+
+**Integrante:**
+
 * Sergio Santana dos Santos
 
-
-🎥 **[[LINK PARA O VÍDEO ([[(https://youtu.be/B3e6lc6I8GQ)]]**
-
----
-
-## 🎯 Visão Geral do Projeto
-Este repositório contém os scripts, datasets e resultados da nossa imersão inicial com Modelos de Linguagem de Grande Escala (LLMs) quantizados para rodar no ambiente local e aplicados ao Domínio Médico. O foco da atividade foi a curadoria especializada, a inferência local e a avaliação crítica das respostas geradas por IA contra padrões-ouro estabelecidos por especialistas.
-
-Trabalhamos com dois subconjuntos de dados:
-* **Dataset M1 (Itaymanes K-QA):** Questões abertas baseadas em casos reais com respostas em texto livre (*free-form answer*).
-  
-* **Dataset M2 (USMLE):** Questões de múltipla escolha focadas no exame de licenciamento médico dos EUA.
-  
-Para:
-* Curadoria de dados
-* Inferência local com múltiplos modelos
-* Avaliação quantitativa e qualitativa
-* Classificação de complexidade clínica
----
-
-## 🛠️ Pré-requisitos e Ferramentas
-
-Para executar os scripts deste repositório, recomendamos a seguinte configuração de ambiente:
-
-1. **IDE (Ambiente de Desenvolvimento):**
-   * Recomendamos o uso do **Visual Studio Code (VS Code)**. 
-   * 🔗 [Download do VS Code aqui](https://code.visualstudio.com/)
-
-2. **Downloads dos Modelos (Hugging Face):**
-   * Os modelos devem ser baixados no formato GGUF e salvos dentro de uma pasta chamada `modelos/` na raiz do projeto.
-   * 🔗 **Llama-3 (8B):** [Meta-Llama-3-8B-Instruct.Q4_K_M.gguf](https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF)
-   * 🔗 **Mistral (7B):** [mistral-7b-instruct-v0.2.Q4_K_M.gguf](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF)
-   * 🔗 **Phi-3 (3.8B):** [Phi-3-mini-4k-instruct-q4.gguf](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf)
+🎥 **Vídeo de Apresentação**
+https://youtu.be/B3e6lc6I8GQ
 
 ---
 
-## ⚙️ Arquitetura Técnica e Configuração de Inferência
+# 📚 Documentação
 
-Para garantir a máxima performance e privacidade na manipulação dos dados médicos, optamos por rodar os modelos 100% localmente. 
+Este projeto possui documentação complementar para facilitar a compreensão dos dados utilizados durante as etapas de curadoria, inferência, avaliação e auditoria clínica.
 
-* **Hardware Base:** Ambiente Ubuntu 24.04 rodando em uma NVIDIA RTX 3060 (12GB VRAM).
-* **Motor de Inferência:** Utilizamos a biblioteca `llama.cpp` (via `llama-cpp-python`) compilada nativamente com suporte a CUDA (`-DGGML_CUDA=on`). Isso nos permitiu carregar todas as camadas dos modelos na VRAM (`n_gpu_layers=-1`), acelerando drasticamente o processamento.
+| Documento                                     | Descrição                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [Dicionário de Dados](./dicionario_dados.pdf) | Estrutura das tabelas, atributos, relacionamentos e campos utilizados ao longo do projeto. |
 
 ---
-📂 Datasets Utilizados
-🔹 Dataset M1 – Questões Abertas
-Fonte: K-QA (Itaymanes)
+
+# 📑 Índice
+
+* Visão Geral
+* Estrutura do Projeto
+* Pré-requisitos
+* Modelos Utilizados
+* Atividade 01 – Curadoria e Inferência Local
+* Atividade 02 – LLM-as-a-Judge e Auditoria Clínica
+* Atividade 03 – RAG e Avaliação de Desempenho Clínico
+* Como Executar
+* Resultados Gerados
+* Conclusão
+
+---
+
+# 🎯 Visão Geral
+
+Este repositório contém o desenvolvimento completo de três atividades práticas envolvendo Modelos de Linguagem de Grande Escala (LLMs) aplicados ao domínio médico.
+
+O projeto abrange:
+
+* Curadoria especializada de datasets médicos;
+* Inferência local utilizando modelos quantizados;
+* Avaliação quantitativa e qualitativa das respostas;
+* Auditoria clínica automatizada utilizando LLM-as-a-Judge;
+* Implementação de Retrieval-Augmented Generation (RAG);
+* Construção de dashboards analíticos para apoio à decisão.
+
+Todos os experimentos foram desenvolvidos com foco em privacidade, reprodutibilidade e avaliação rigorosa da qualidade clínica das respostas geradas por Inteligência Artificial.
+
+---
+
+# 📂 Estrutura do Projeto
+
+```text
+.
+├── atividade01/
+│   ├── scripts da atividade
+│   ├── datasets utilizados
+│   └── resultados gerados
+│
+├── atividade02/
+│   ├── scripts de auditoria clínica
+│   ├── integração PostgreSQL
+│   ├── avaliação LLM-as-a-Judge
+│   └── dashboard Streamlit
+│
+├── atividade03/
+│   ├── documentos/
+│   │   ├── Standards of Care in Diabetes 2024 (ADA)
+│   │   └── Guideline for Chronic Coronary Disease 2023 (AHA/ACC)
+│   │
+│   ├── scripts RAG
+│   ├── avaliação comparativa
+│   └── dashboard analítico
+│
+├── chromadb_local/
+│   └── base vetorial utilizada pelo pipeline RAG
+│
+├── modelos/
+│   ├── Meta-Llama-3
+│   ├── Mistral
+│   └── Phi-3
+│
+├── dicionario_dados.pdf
+└── README.md
+```
+
+---
+
+# 🛠️ Pré-requisitos
+
+## Hardware Utilizado
+
+* Ubuntu 24.04
+* NVIDIA RTX 3060 12GB
+* CUDA Toolkit
+* Python 3.11+
+
+## Ambiente Recomendado
+
+* Visual Studio Code
+* PostgreSQL
+* ChromaDB
+* Streamlit
+
+---
+
+# 🤖 Modelos Utilizados
+
+Os modelos foram executados localmente utilizando `llama.cpp` e `llama-cpp-python`.
+
+| Modelo           | Tamanho |
+| ---------------- | ------- |
+| Llama-3 Instruct | 8B      |
+| Mistral Instruct | 7B      |
+| Phi-3 Mini       | 3.8B    |
+
+Todos os modelos devem ser armazenados na pasta:
+
+```text
+modelos/
+```
+
+---
+
+# 📊 Atividade 01 — Curadoria e Inferência Local
+
+## Objetivos
+
+* Curadoria de datasets médicos;
+* Inferência local com múltiplos modelos;
+* Avaliação quantitativa;
+* Classificação da complexidade clínica.
+
+## Datasets Utilizados
+
+### Dataset M1 — Questões Abertas (K-QA)
+
 Contém:
-Question
-Free_form_answer (padrão-ouro)
-Must_have
-Nice_to_have
-Sources
-ICD_10_diag
-🔹 Dataset M2 – Múltipla Escolha
-Fonte: USMLE
-Contém questões objetivas com gabarito oficial
----
 
-## 📊 Métricas de Avaliação (Quantitativas e Qualitativas)
+* Question
+* Free_form_answer
+* Must_have
+* Nice_to_have
+* Sources
+* ICD_10_diag
 
-Devido à natureza crítica do domínio médico, a avaliação não pode se basear apenas na exatidão das palavras, mas sim no rigor semântico e clínico. Implementamos um pipeline de múltiplas métricas:
+### Dataset M2 — USMLE
 
-### 1. Dataset M1 (Questões Abertas)
-* **BERTScore:** Avaliação semântica quantitativa. Utilizamos o modelo `roberta-large` para comparar a intenção e o significado da resposta gerada contra o gabarito padrão-ouro, superando as limitações de métricas lexicais como BLEU.
-* **F1-Token:** Avaliação de precisão e recall baseada na exatidão exata das palavras.
-* **Desvio de Similaridade:** Cálculo da divergência entre as respostas dos três modelos para analisar diferentes "linhas de raciocínio" clínico.
-* **LLM-as-a-Judge (Avaliação Qualitativa):** Utilizamos o Llama-3 atuando como um "Juiz Cego". O modelo avaliou cada par de respostas (Padrão-Ouro vs. Gerada) e atribuiu uma nota de **1 a 5** para a precisão médica e integridade da informação gerada.
+Contém:
 
-### 2. Dataset M2 (Múltipla Escolha)
-* **Acurácia Estrita:** Utilização de expressões regulares (Regex) e injeção de *system prompts* restritivos para forçar a extração de uma única letra (A-E), permitindo o cálculo exato de acertos contra o gabarito oficial.
-* **Taxa de Concordância:** Métrica binária (Unânime/Divergente) para avaliar o consenso dos três modelos diante do mesmo caso clínico.
+* Questões de múltipla escolha;
+* Alternativas;
+* Gabarito oficial.
 
 ---
 
-🧠 Classificação de Dificuldade (Curadoria)
+## Métricas Utilizadas
+
+### Questões Abertas
+
+* BERTScore
+* F1-Token
+* Desvio de Similaridade
+* LLM-as-a-Judge
+
+### Questões Objetivas
+
+* Acurácia Estrita
+* Taxa de Concordância
+
+---
+
+## Classificação de Complexidade
 
 As questões foram classificadas em:
 
-Triagem → Casos simples e diretos
-Generalista → Conhecimento clínico básico
-Especialista → Exige protocolos e análise clínica
-Expert → Casos complexos ou raros
-🤝 Ensemble de Modelos
-
-Cada questão é avaliada por três modelos:
-
-LLaMA
-Mistral
-Phi-3
-
-A classificação final é definida por voto majoritário.
+* Triagem
+* Generalista
+* Especialista
+* Expert
 
 ---
 
-📊 Resultados Gerados
-**Excel consolidado com:
-* Respostas dos modelos
-* Classificação por modelo
-* BERTScore
-* Voto final
-**Gráficos:
+## Ensemble de Modelos
+
+Cada questão foi avaliada por:
+
+* Llama-3
+* Mistral
+* Phi-3
+
+A classificação final foi definida por voto majoritário.
+
+---
+
+# 🏥 Atividade 02 — LLM-as-a-Judge e Auditoria Clínica
+
+Nesta etapa foi implementado um pipeline completo de MLOps para avaliação automática de respostas médicas utilizando um modelo de grande escala na nuvem.
+
+## Modelo Juiz
+
+* Llama-3.3-70B
+* Groq API
+
+## Funcionalidades
+
+* Integração PostgreSQL;
+* Avaliação clínica automática;
+* Controle de Rate Limit;
+* Classificação automática de erros médicos;
+* Dashboard analítico;
+* Benchmarking entre modelos.
+
+---
+
+## Scripts Desenvolvidos
+
+| Script                       | Função                 |
+| ---------------------------- | ---------------------- |
+| setup_banco.py               | Criação das tabelas    |
+| inserir_respostas.py         | Carga das respostas    |
+| gerar_csv_finais.py          | Geração dos CSVs       |
+| juiz_nuvem.py                | Avaliação clínica      |
+| exportar_avaliacoes.py       | Exportação consolidada |
+| gerar_insights_csv_sergio.py | Extração de insights   |
+| app_auditoria_final.py       | Dashboard Streamlit    |
+
+---
+
+# 🧠 Atividade 03 — RAG e Avaliação de Desempenho Clínico
+
+Esta atividade implementa Retrieval-Augmented Generation (RAG) para enriquecer o conhecimento dos modelos locais utilizando diretrizes médicas oficiais.
+
+---
+
+## Base de Conhecimento
+
+Os documentos utilizados encontram-se em:
+
+```text
+atividade03/documentos/
+```
+
+### Diretriz ADA
+
+**Standards of Care in Diabetes — 2024**
+
+Utilizada para atualização de protocolos relacionados a:
+
+* Diabetes Tipo 1
+* Diabetes Tipo 2
+* GLP-1
+* Controle cardiovascular
+
+### Diretriz AHA/ACC
+
+**2023 Guideline for Chronic Coronary Disease**
+
+Utilizada para atualização de protocolos relacionados a:
+
+* Cardiologia
+* Doença coronária crônica
+* Betabloqueadores
+* Tratamentos cardiovasculares
+
+---
+
+## Base Vetorial
+
+Os embeddings gerados são armazenados em:
+
+```text
+chromadb_local/
+```
+
+---
+
+## Pipeline RAG
+
+### 1. re_inferencia_rag.py
+
+Geração de novas respostas utilizando contexto recuperado do ChromaDB.
+
+### 2. juiz_nuvem_rag.py
+
+Avaliação clínica das respostas enriquecidas com RAG.
+
+### 3. analise_estatistica_rag.py
+
+Análise comparativa entre:
+
+* Sem RAG
+* Com RAG
+
+Gerando:
+
+* Correlação de Spearman
+* Gráficos comparativos
+
+### 4. dashboard_equipe5.py
+
+Dashboard interativo para exploração dos resultados.
+
+### 5. exportar_dados.py
+
+Exportação consolidada dos dados para CSV.
+
+---
+
+# 🚀 Como Executar
+
+## Instalar Dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+Para aceleração via GPU:
+
+```bash
+CMAKE_ARGS="-DGGML_CUDA=on" pip install -r requirements.txt
+```
+
+---
+
+## Atividade 01
+
+Executar os scripts localizados em:
+
+```text
+atividade01/
+```
+
+---
+
+## Atividade 02
+
+Executar os scripts localizados em:
+
+```text
+atividade02/
+```
+
+---
+
+## Atividade 03
+
+Executar os scripts localizados em:
+
+```text
+atividade03/
+```
+
+---
+
+# 📈 Resultados Gerados
+
+## Planilhas
+
+* M1_RESULTADO_COMPLETO.xlsx
+* avaliacoes_consolidadas_equipe5.csv
+
+## Gráficos
+
 * ranking_modelos.png
 * score_por_classe.png
+* gráficos comparativos do RAG
+
+## Dashboards
+
+* app_auditoria_final.py
+* dashboard_equipe5.py
 
 ---
 
-📈 Saídas
-M1_RESULTADO_COMPLETO.xlsx
-ranking_modelos.png
-score_por_classe.png
+# 🎓 Conclusão
 
----
+O projeto demonstrou a viabilidade do uso de modelos de linguagem executados localmente para aplicações clínicas, combinando:
 
-🧾 Conclusão
+* Curadoria especializada;
+* Avaliação quantitativa;
+* Auditoria clínica automatizada;
+* Recuperação de conhecimento externo via RAG;
+* Dashboards analíticos para suporte à decisão.
 
-O uso de múltiplos modelos em ensemble, combinado com métricas semânticas, permitiu uma avaliação robusta da qualidade das respostas e da complexidade clínica das questões.
-
----
-
-## 🚀 Como Reproduzir os Experimentos
-
-1. Clone este repositório.
-2. Instale as dependências listadas no `requirements.txt` (certifique-se de ter os compiladores C++ e o toolkit da NVIDIA instalados se desejar usar aceleração por GPU):
-
-   CMAKE_ARGS="-DGGML_CUDA=on" pip install -r requirements.txt
----
-3. 📊 Pipeline do Projeto
-🔹 1. 1_pipeline_m1.py
-Geração de respostas para questões abertas
-🔹 2. 2_juiz_m1.py
-Avaliação qualitativa (LLM-as-a-Judge)
-🔹 3. 3_pipeline_m2.py
-Resolução de questões objetivas (USMLE)
-🔹 4. 4_classificacao_m1.py
-Classificação de dificuldade usando ensemble de LLMs
-Geração de métricas e gráficos
----
-
-# 🩺 Atividade 2: LLM-as-a-Judge e Auditoria Clínica (Equipa 5)
-
-Nesta segunda fase do projeto, implementámos um pipeline completo de MLOps para avaliar automaticamente as respostas médicas geradas pelos nossos modelos locais (Llama-3, Mistral e Phi-3) utilizando um modelo de grande escala na nuvem (Llama-3.3-70B via Groq API) atuando como Juiz Clínico. 
-
-Além das notas quantitativas, extraímos insights qualitativos e desenvolvemos uma plataforma interativa de auditoria de segurança do paciente.
-
----
-
-## 🚀 Passo a Passo da Realização da Atividade 2
-
-O desenvolvimento desta atividade seguiu uma esteira de dados rigorosa:
-
-1. **Infraestrutura de Dados:** Criação da estrutura relacional no PostgreSQL e importação das perguntas, gabaritos e das respostas brutas geradas pelos nossos modelos locais.
-2. **Adequação de Formatos:** Transformámos os nossos dados originais nos formatos padronizados exigidos (CSV para MCQ e Open) para garantir compatibilidade com as métricas de exatidão.
-3. **Avaliação Automatizada (O Juiz IA):** Conectámos o nosso banco de dados PostgreSQL à API da Groq para que o Llama-3.3-70B lesse cada resposta médica aberta, atribuísse uma nota de 1 a 5 e justificasse o raciocínio com base em diretrizes clínicas.
-4. **Controle de Limites (Rate Limits):** Implementámos um sistema inteligente de *backoff* e hibernação que pausa os scripts automaticamente para não estourar os limites de tokens diários e por minuto da API gratuita.
-5. **Extração de Dados e Meta-Avaliação:** Exportámos as avaliações do banco para CSV e rodámos uma segunda camada de IA para classificar os tipos de erro (ex: Omissão de Dosagem, Diagnóstico Errado) e gerar insights para o AI Studio.
-6. **Dashboard Analítico:** Consolidámos todos os dados numa aplicação Streamlit interativa, permitindo auditar o desempenho, comparar o *gap* tecnológico entre modelos locais e gigantes da nuvem, e medir o risco clínico real (risco de óbito).
-
----
-
-## 🛠️ Scripts Desenvolvidos e Como Executá-los
-
-Abaixo estão os scripts criados para esta atividade. Eles devem ser executados com o ambiente virtual Python ativado (`source venv_medico/bin/activate`).
-
-### 1. `setup_banco.py`
-* **O que faz:** Cria a infraestrutura do banco de dados PostgreSQL, estabelecendo as tabelas relacionais (perguntas, modelos, respostas e avaliações_juiz) garantindo a integridade dos dados.
-* **Como executar:** 
-  python3 setup_banco.py
-
-### 2. `inserir_respostas.py`
-* **O que faz:** Lê os resultados brutos gerados pelos nossos modelos locais (Llama-3, Mistral, Phi-3) e popula o banco de dados, interligando cada resposta à sua respectiva pergunta e gabarito ouro.
-* **Como executar:** 
-python3 inserir_respostas.py
-
-### 3. `gerar_csv_finais.py`
-* **O que faz:** Lê as planilhas Excel originais da Atividade 1 e gera automaticamente os arquivos padronizados `MCQ_Llama.csv`,`MCQ_Mistral.csv`,`MCQ_Phi-3.csv` (com cálculo de acurácia) e ``Open_Llama.csv`,`Open_Mistral.csv`,`Open_Phi-3.csv`.
-* **Como executar:**
-  python3 gerar_csv_finais.py
-
- ### 4.  `juiz_nuvem.py`
-* **O que faz:** Conecta-se ao PostgreSQL, envia as perguntas e respostas abertas para o Llama-3.3-70B avaliar rigorosamente, e salva as notas (1-5) e justificativas de volta no banco, com tolerância a falhas e pausas automáticas de limite de API. 
-* **Como executar:**
-python3 juiz_nuvem.py
-
-### 5. `exportar_avaliacoes.py`
-* **O que faz:** Faz o cruzamento (JOIN) de todas as tabelas no PostgreSQL e exporta as avaliações completas do Juiz-IA para um arquivo avaliacoes_consolidadas_equipe5.csv.
-* **Como executar:**
-python3 exportar_avaliacoes.py
-
-### 6. `gerar_insights_csv_sergio.py`
-* **O que faz:** Processa o CSV consolidado e utiliza a IA para classificar os erros médicos dos modelos locais em categorias curtas e gerar insights clínicos num novo CSV (insights_sergio_para_aistudio.csv), retomando de onde parou em caso de interrupção.
-* **Como executar:**
-python3 gerar_insights_csv_sergio.py
-
-### 7. `app_auditoria_final.py`
-* **O que faz:** Levanta uma aplicação web robusta (Dashboard Streamlit) contendo a visão global da equipa, o benchmarking paramétrico contra os modelos de nuvem e a auditoria de risco de vida baseada nos insights extraídos.
-* **Como executar:**
-streamlit run app_auditoria_final.py
-
-Projeto desenvolvido para a disciplina de Tópicos Avançados - Equipa MED 5.
+A utilização de múltiplos modelos em ensemble, associada a métricas semânticas e avaliação clínica automatizada, permitiu uma análise robusta da qualidade das respostas e dos riscos associados à utilização de IA no domínio médico.
